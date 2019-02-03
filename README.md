@@ -1,2 +1,2 @@
-# url_shortener
+# URL Shortener
 Small full-stack project for url shortener microservice. Idea from the freeCodeCamp Apis and Microservices Projects.
