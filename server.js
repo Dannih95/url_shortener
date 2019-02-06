@@ -2,6 +2,7 @@
 
 var express = require('express');
 var mongo = require('mongodb');
+var bodyParser = require('body-parser');
 //var mongoose = require('mongoose');
 
 var MongoClient = mongo.MongoClient;
@@ -40,13 +41,19 @@ app.get('/', function(req, res){
   
 // your first API endpoint... 
 app.get("/api/hello", function (req, res) {
-  var example = { url: "www.facebook.com", newUrl: "www.freecodecamp.com" };
+  var example = { original_url: "www.facebook.com", short_url: 1 };
   dbo.collection("url-mapping").insertOne(example, function(err, res) {
     if(err) throw err;
     console.log("1 document inserted.");
     dbo.close();
   });
   res.json({greeting: 'hello API'});
+});
+
+app.use(bodyParser.urlencoded({extended: false}));
+app.post("/api/shorturl/new", function (req, res) {
+  console.log(req.body.url);
+  res.redirect('/');
 });
 
 
