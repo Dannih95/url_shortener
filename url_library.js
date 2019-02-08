@@ -26,8 +26,11 @@ function parseUrl(url) {
   if(checkProtocol(urlAux) === 'http') {
     console.log("URL with HTTP Protocol");
     return urlAux.substr(7);
+  } else if(checkProtocol(urlAux) === 'https') {
+    console.log("URL with HTTPS Protocol");
+    return urlAux.substr(8);    
   }
-  return 'www.abola.pt';
+  return urlAux;
 }
 
 module.exports = {

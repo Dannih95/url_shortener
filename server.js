@@ -43,12 +43,27 @@ app.get("/api/hello", function (req, res) {
 app.use(bodyParser.urlencoded({extended: false}));
 app.post("/api/shorturl/new", function (req, res) {
   if(url_library.validateUrl(req.body.url)) {
-    dns.resolve4(url_library.parseUrl(req.body.url), function(err, addresses) {
-      if(err) throw err;
+    let url = url_library.parseUrl(req.body.url); // Gets Url without http/https if the case
+    console.log("URL after parsing: " + url);
+    // Takes the hostname and finds the ip
+    dns.resolve4(url, function(err, addresses) {
+      if(err) {
+        res.json({"error": "a problem occured, I'm sorry while resolving the hostname"});
+      }
       console.log("IP Address: " + addresses[0]);
+      // Takes the ip and finds the hostname
       dns.reverse(addresses[0], function(err, records) {
-        if(err) throw err;
-        if(records[0] === req.body.url) { // Needs to add 'http' or 'https' if that's the case
+        if(err) {
+          res.json({"error": "a problem occured, I'm sorry while reversing the ip"});
+        }
+        if(records[0] === url) {
+          let document = {"original_url": url, "short_url": "1"};
+          dbo.collection("url-mapping").insertOne(document, function(err, res) {
+            if(err) { 
+              res.json({"error": "couldn't register the new url"});
+            }
+            console.log("Url " + url + " registered on db");
+          });
           res.json({"original_url": req.body.url, "short_url": records[0]});
         } else {
           res.json({"error":"invalid URL"});
