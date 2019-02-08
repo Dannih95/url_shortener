@@ -4,6 +4,7 @@ var express = require('express');
 var mongo = require('mongodb');
 var bodyParser = require('body-parser');
 var dns = require('dns');
+var url_library = require('./url_library');
 //var mongoose = require('mongoose');
 
 var MongoClient = mongo.MongoClient;
@@ -41,12 +42,23 @@ app.get("/api/hello", function (req, res) {
 
 app.use(bodyParser.urlencoded({extended: false}));
 app.post("/api/shorturl/new", function (req, res) {
-  dns.lookup('www.abola.pt', function(err, address, family) {
-    if(err) throw err;
-    //console.log(req.body.url);
-    console.log("IP Address: " + address);
-  });
-  res.redirect('/');
+  if(url_library.validateUrl(req.body.url)) {
+    dns.resolve4(url_library.parseUrl(req.body.url), function(err, addresses) {
+      if(err) throw err;
+      console.log("IP Address: " + addresses[0]);
+      dns.reverse(addresses[0], function(err, records) {
+        if(err) throw err;
+        if(records[0] === req.body.url) { // Needs to add 'http' or 'https' if that's the case
+          res.json({"original_url": req.body.url, "short_url": records[0]});
+        } else {
+          res.json({"error":"invalid URL"});
+        }
+      });
+    });
+  }
+  else {
+    res.json({"error":"invalid URL format"});
+  }
 });
 
 app.listen(port, function () {
