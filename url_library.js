@@ -33,7 +33,19 @@ function parseUrl(url) {
   return urlAux;
 }
 
+function getShortUrlNumber(url) {
+  let urlAux = url;
+  console.log("urlAux = " + urlAux);
+  let urlArray = urlAux.split('/');
+  console.log(urlArray.length);
+  if(urlArray.length === 4) {
+    return urlArray[3];
+  }
+  return false;
+}
+
 module.exports = {
   validateUrl: validateUrl,
-  parseUrl: parseUrl
+  parseUrl: parseUrl,
+  getShortUrlNumber: getShortUrlNumber
 }

@@ -25,7 +25,7 @@ var port = process.env.PORT || 3000;
 app.use(cors());
 app.use('/public', express.static(process.cwd() + '/public'));
 
-app.get('/', function(req, res){
+app.get("/", function(req, res){
   res.sendFile(process.cwd() + '/views/index.html');
 });
 
@@ -50,8 +50,6 @@ app.post("/api/shorturl/new", function (req, res) {
       if(err) {
         return res.json({"error": "a problem occured, while resolving the hostname"});
       }
-      ips.forEach(function(ip) {
-      console.log("IP Address: " + ip);});
       
       dns.reverse(ips[0], function(err, domains) {
         if(err) {
@@ -74,7 +72,7 @@ app.post("/api/shorturl/new", function (req, res) {
                   }
                   console.log("Url " + url + " registered on db");
                 });
-                return res.json({"original_url": req.body.url, "short_url": domains[0]});
+                return res.json({"original_url": req.body.url, "short_url": "1"});
               }
             });
           });
@@ -83,8 +81,17 @@ app.post("/api/shorturl/new", function (req, res) {
     });
   }
   else {
-    return res.json({"error":"invalid URL"});
+    return res.json({"error":"invalid URL "});
   }
+});
+
+app.get(/\/api\/shorturl\/[0-9]+/, function(req, res) {
+  //console.log(req.originalUrl);
+  let urlNumber = url_library.getShortUrlNumber(req.originalUrl);
+  if(urlNumber) {
+    return res.send(urlNumber);
+  }
+  return res.send("ERROR");
 });
 
 app.listen(port, function () {
