@@ -46,7 +46,7 @@ app.post("/api/shorturl/new", function (req, res) {
     let url = url_library.parseUrl(req.body.url); // Gets Url without http/https if the case
     console.log("URL after parsing: " + url);
     // Takes the hostname and finds the ip
-    dns.resolve4(url, function(err, ips) {
+    dns.resolve4(url.url, function(err, ips) {
       if(err) {
         return res.json({"error": "a problem occured, while resolving the hostname"});
       }
@@ -65,12 +65,12 @@ app.post("/api/shorturl/new", function (req, res) {
             }
             ipsAux.forEach(function(ip) {
               if(ip === ips[0]) {
-                let document = {"original_url": url, "short_url": "1"};
+                let document = {"original_url": url.url, "short_url": "1", "protocol": url.protocol};
                 dbo.collection("url-mapping").insertOne(document, function(err, res) {
                   if(err) { 
                     return res.json({"error": "couldn't register the new url"});
                   }
-                  console.log("Url " + url + " registered on db");
+                  console.log("Url " + url.url + " registered on db");
                 });
                 return res.json({"original_url": req.body.url, "short_url": "1"});
               }
@@ -87,11 +87,19 @@ app.post("/api/shorturl/new", function (req, res) {
 
 app.get(/\/api\/shorturl\/[0-9]+/, function(req, res) {
   //console.log(req.originalUrl);
+  var domain;
   let urlNumber = url_library.getShortUrlNumber(req.originalUrl);
   if(urlNumber) {
-    return res.send(urlNumber);
+    let query = { "short_url": urlNumber };
+    dbo.collection("url-mapping").findOne(query, function(err, result) {
+      if(err) {
+        return res.json({"error": err.code});
+      }
+      console.log("result = " + result.original_url);
+      domain = result.protocol + result.original_url;
+      return res.redirect(domain);
+    });
   }
-  return res.send("ERROR");
 });
 
 app.listen(port, function () {

@@ -6,31 +6,35 @@ function checkProtocol(url) {
   let regexHTTPS = /^https?:\/\//;
   let result = {}
   if(regexHTTP.test(urlAux)) {
-    return 'http';
+    return "http";
   } else if(regexHTTPS.test(urlAux)) {
-    return 'https';
+    return "https";
   }
-  return 'none';
+  return "none";
 }
 
 function validateUrl(url) {
   let urlAux = url;
-  if(checkProtocol(urlAux) !== 'none') {
+  if(checkProtocol(urlAux) !== "none") {
     return true;
   }
-  return url.indexOf('www') === 0;
+  return url.indexOf("www") === 0;
 }
 
 function parseUrl(url) {
   let urlAux = url;
-  if(checkProtocol(urlAux) === 'http') {
+  let urlObject;
+  if(checkProtocol(urlAux) === "http") {
     console.log("URL with HTTP Protocol");
-    return urlAux.substr(7);
-  } else if(checkProtocol(urlAux) === 'https') {
+    urlObject = { protocol: "http://", url: urlAux.substr(7) };
+    return urlObject;
+  } else if(checkProtocol(urlAux) === "https") {
     console.log("URL with HTTPS Protocol");
-    return urlAux.substr(8);    
+    urlObject = { protocol: "https://", url: urlAux.substr(8) };
+    return urlObject;    
   }
-  return urlAux;
+  urlObject = { protocol: "https://", url: urlAux };
+  return urlObject;
 }
 
 function getShortUrlNumber(url) {
