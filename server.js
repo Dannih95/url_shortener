@@ -104,7 +104,7 @@ app.get(/\/api\/shorturl\/[0-9]+/, function(req, res) {
   var domain;
   let urlNumber = url_library.getShortUrlNumber(req.originalUrl);
   if(urlNumber) {
-    let query = { "short_url": urlNumber };
+    let query = { "short_url": parseInt(urlNumber) };
     dbo.collection("url-mapping").findOne(query, function(err, result) {
       if(err) {
         return res.json({"error": err.code});
