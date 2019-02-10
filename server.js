@@ -44,7 +44,7 @@ app.use(bodyParser.urlencoded({extended: false}));
 app.post("/api/shorturl/new", function (req, res) {
   if(url_library.validateUrl(req.body.url)) {
     let url = url_library.parseUrl(req.body.url); // Gets Url without http/https if the case
-    console.log("URL after parsing: " + url);
+    console.log("URL after parsing: " + url.url);
     // Takes the hostname and finds the ip
     dns.resolve4(url.url, function(err, ips) {
       if(err) {
@@ -65,14 +65,28 @@ app.post("/api/shorturl/new", function (req, res) {
             }
             ipsAux.forEach(function(ip) {
               if(ip === ips[0]) {
-                let document = {"original_url": url.url, "short_url": "1", "protocol": url.protocol};
-                dbo.collection("url-mapping").insertOne(document, function(err, res) {
-                  if(err) { 
-                    return res.json({"error": "couldn't register the new url"});
+                // Search for max short_url
+                let query = [{ $group: { _id: "", maxShortUrl: { $max: "$short_url" } } }];
+                dbo.collection("url-mapping").aggregate(query, function(err, result) {
+                  if(err) {
+                    return res.json({"error": err.code});
                   }
-                  console.log("Url " + url.url + " registered on db");
+                  let document;
+                  if(result.length != 0) {
+                    console.log("max = " + result[0].maxShortUrl);
+                    // If has at least 1 document inserted before, the insert uses the max short_url + 1
+                    document = {"original_url": url.url, "short_url": (result[0].maxShortUrl + 1), "protocol": url.protocol};
+                  } else {
+                    document = {"original_url": url.url, "short_url": 1, "protocol": url.protocol};
+                  }
+                  dbo.collection("url-mapping").insertOne(document, function(err, resultInsert) {
+                    if(err) { 
+                      return res.json({"error": "couldn't register the new url"});
+                    }
+                    console.log("Url " + url.url + " registered on db");
+                  });
+                  return res.json({ "original_url": req.body.url, "short_url": ((result.length != 0) ? (result[0].maxShortUrl + 1) : 1)});
                 });
-                return res.json({"original_url": req.body.url, "short_url": "1"});
               }
             });
           });
