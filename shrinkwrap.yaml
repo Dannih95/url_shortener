@@ -2,6 +2,7 @@ dependencies:
   body-parser: 1.18.3
   cors: 2.8.5
   dns: 0.2.2
+  ejs: 2.6.1
   express: 5.0.0-alpha.7
   mongodb: 2.2.36
   mongoose: 4.13.18
@@ -359,6 +360,12 @@ packages:
     dev: false
     resolution:
       integrity: sha1-WQxhFWsK4vTwJVcyoViyZrxWsh0=
+  /ejs/2.6.1:
+    dev: false
+    engines:
+      node: '>=0.10.0'
+    resolution:
+      integrity: sha512-0xy4A/twfrRCnkhfk8ErDi5DqdAsAqeGxht4xkCUrsvhhbQNs7E+4jV0CN7+NKIY0aHE72+XvqtBIXzD31ZbXQ==
   /encodeurl/1.0.2:
     dev: false
     engines:
@@ -1422,6 +1429,7 @@ packages:
       node: '>=0.4.0'
     name: xmlhttprequest
     resolution:
+      registry: 'https://registry.npmjs.org/'
       tarball: 'https://github.com/LearnBoost/node-XMLHttpRequest/archive/0f36d0b5ebc03d85f860d42a64ae9791e1daa433.tar.gz'
     version: 1.5.0
   github.com/component/emitter/archive/1.0.1.tar.gz:
@@ -1430,12 +1438,14 @@ packages:
     dev: false
     name: emitter
     resolution:
+      registry: 'https://registry.npmjs.org/'
       tarball: 'http://github.com/component/emitter/archive/1.0.1.tar.gz'
     version: 1.0.1
   github.com/component/global/archive/v2.0.1.tar.gz:
     dev: false
     name: global
     resolution:
+      registry: 'https://registry.npmjs.org/'
       tarball: 'https://github.com/component/global/archive/v2.0.1.tar.gz'
     version: 2.0.1
 registry: 'https://registry.npmjs.org/'
@@ -1445,6 +1455,7 @@ specifiers:
   body-parser: ^1.15.2
   cors: ^2.8.1
   dns: ^0.2.2
+  ejs: ^2.6.1
   express: ^5.0.0-alpha.2
   mongodb: ^2.2.5
   mongoose: ^4.5.7

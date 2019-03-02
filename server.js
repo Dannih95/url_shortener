@@ -25,6 +25,10 @@ var port = process.env.PORT || 3000;
 app.use(cors());
 app.use('/public', express.static(process.cwd() + '/public'));
 
+// HTML engine set up for variable passing to the html file
+app.engine('html', require('ejs').renderFile);
+app.set('view engine', 'html');
+
 app.get("/", function(req, res){
   res.sendFile(process.cwd() + '/views/index.html');
 });
@@ -74,7 +78,7 @@ app.post("/api/shorturl/new", function (req, res) {
                   let document;
                   if(result.length != 0) {
                     console.log("max = " + result[0].maxShortUrl);
-                    // If has at least 1 document inserted before, the insert uses the max short_url + 1
+                    // If had at least 1 document inserted before, the insert uses the max short_url + 1
                     document = {"original_url": url.url, "short_url": (result[0].maxShortUrl + 1), "protocol": url.protocol};
                   } else {
                     document = {"original_url": url.url, "short_url": 1, "protocol": url.protocol};
@@ -85,7 +89,9 @@ app.post("/api/shorturl/new", function (req, res) {
                     }
                     console.log("Url " + url.url + " registered on db");
                   });
-                  return res.json({ "original_url": req.body.url, "short_url": ((result.length != 0) ? (result[0].maxShortUrl + 1) : 1)});
+                  return res.render(__dirname + "/views/result.html", { short_url: JSON.stringify((result.length != 0) ? (result[0].maxShortUrl + 1) : 1) });
+                  // Old version before using a variable on the html return page
+                  //return res.json({ "original_url": req.body.url, "short_url": ((result.length != 0) ? (result[0].maxShortUrl + 1) : 1)});
                 });
               }
             });
