@@ -52,12 +52,16 @@ app.post("/api/shorturl/new", function (req, res) {
     // Takes the hostname and finds the ip
     dns.resolve4(url.url, function(err, ips) {
       if(err) {
-        return res.json({"error": "a problem occured, while resolving the hostname"});
+        return res.render(__dirname + "/views/error.html", { error:  "A problem occured, while resolving the hostname." });
+        // Old version before using a placeholder variable on an error return page
+        //return res.json({"error": "a problem occured, while resolving the hostname"});
       }
       
       dns.reverse(ips[0], function(err, domains) {
         if(err) {
-          return res.json({"error": err.code});
+          return res.render(__dirname + "/views/error.html", { error:  err.code });
+          // Old version before using a placeholder variable on an error return page
+          //return res.json({"error": err.code });
         }
         
         domains.forEach(function(domain) {
@@ -65,7 +69,9 @@ app.post("/api/shorturl/new", function (req, res) {
           dns.resolve4(domain, function(err, ipsAux) {
             console.log("ip = " + ipsAux[0]);
             if(err) {
-              return res.json({"error": "a problem occured, I'm sorry while reversing"});
+              return res.render(__dirname + "/views/error.html", { error:  "A problem occured, while resolving the hostname." });
+              // Old version before using a placeholder variable on an error return page
+              //return res.json({"error": "a problem occured, I'm sorry while reversing"});
             }
             ipsAux.forEach(function(ip) {
               if(ip === ips[0]) {
@@ -73,7 +79,9 @@ app.post("/api/shorturl/new", function (req, res) {
                 let query = [{ $group: { _id: "", maxShortUrl: { $max: "$short_url" } } }];
                 dbo.collection("url-mapping").aggregate(query, function(err, result) {
                   if(err) {
-                    return res.json({"error": err.code});
+                    return res.render(__dirname + "/views/error.html", { error:  err.code });
+                    // Old version before using a placeholder variable on an error return page
+                    //return res.json({"error": err.code});
                   }
                   let document;
                   if(result.length != 0) {
@@ -84,8 +92,10 @@ app.post("/api/shorturl/new", function (req, res) {
                     document = {"original_url": url.url, "short_url": 1, "protocol": url.protocol};
                   }
                   dbo.collection("url-mapping").insertOne(document, function(err, resultInsert) {
-                    if(err) { 
-                      return res.json({"error": "couldn't register the new url"});
+                    if(err) {
+                      return res.render(__dirname + "/views/error.html", { error:  "Couldn't register the new url." });
+                      // Old version before using a placeholder variable on an error return page
+                      //return res.json({"error": "couldn't register the new url"});
                     }
                     console.log("Url " + url.url + " registered on db");
                   });
@@ -101,7 +111,9 @@ app.post("/api/shorturl/new", function (req, res) {
     });
   }
   else {
-    return res.json({"error":"invalid URL "});
+    return res.render(__dirname + "/views/error.html", { error:  "Invalid URL." });
+    // Old version before using a variable on the html return page
+    //return res.json({"error":"invalid URL "});
   }
 });
 
@@ -113,7 +125,9 @@ app.get(/\/api\/shorturl\/[0-9]+/, function(req, res) {
     let query = { "short_url": parseInt(urlNumber) };
     dbo.collection("url-mapping").findOne(query, function(err, result) {
       if(err) {
-        return res.json({"error": err.code});
+        return res.render(__dirname + "/views/error.html", { error:  err.code });
+        // Old version before using a variable on the html return page
+        //return res.json({"error": err.code});
       }
       console.log("result = " + result.original_url);
       domain = result.protocol + result.original_url;

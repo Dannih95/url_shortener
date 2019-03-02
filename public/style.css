@@ -84,3 +84,11 @@ input[type=text] {
 #thankyou {
   margin-top: 30px;
 }
+
+.errorSmile {
+  font-size: 50px;
+}
+
+.errorInfo {
+  margin-top: 50px; 
+}
