@@ -46,13 +46,12 @@ app.get("/api/hello", function (req, res) {
 
 app.use(bodyParser.urlencoded({extended: false}));
 app.post("/api/shorturl/new", function (req, res) {
-  if(url_library.validateUrl(req.body.url)) {
-    let url = url_library.parseUrl(req.body.url); // Gets Url without http/https if the case
-    console.log("URL after parsing: " + url.url);
+  let urlJSON = url_library.verifyUrl(req.body.url);
+  if(urlJSON.isValid) {
     // Takes the hostname and finds the ip
-    dns.resolve4(url.url, function(err, ips) {
+    dns.resolve4(urlJSON.hostname, function(err, ips) {
       if(err) {
-        return res.render(__dirname + "/views/error.html", { error:  "A problem occured, while resolving the hostname." });
+        return res.render(__dirname + "/views/error.html", { error:  "A problem occured while resolving the hostname." });
         // Old version before using a placeholder variable on an error return page
         //return res.json({"error": "a problem occured, while resolving the hostname"});
       }
@@ -69,7 +68,7 @@ app.post("/api/shorturl/new", function (req, res) {
           dns.resolve4(domain, function(err, ipsAux) {
             console.log("ip = " + ipsAux[0]);
             if(err) {
-              return res.render(__dirname + "/views/error.html", { error:  "A problem occured, while resolving the hostname." });
+              return res.render(__dirname + "/views/error.html", { error:  "A problem occured while resolving the hostname." });
               // Old version before using a placeholder variable on an error return page
               //return res.json({"error": "a problem occured, I'm sorry while reversing"});
             }
@@ -87,9 +86,9 @@ app.post("/api/shorturl/new", function (req, res) {
                   if(result.length != 0) {
                     console.log("max = " + result[0].maxShortUrl);
                     // If had at least 1 document inserted before, the insert uses the max short_url + 1
-                    document = {"original_url": url.url, "short_url": (result[0].maxShortUrl + 1), "protocol": url.protocol};
+                    document = {"originalUrl": urlJSON.originalUrl, "hostname": urlJSON.hostname, "path": urlJSON.path, "protocol": urlJSON.protocol, "short_url": (result[0].maxShortUrl + 1)};
                   } else {
-                    document = {"original_url": url.url, "short_url": 1, "protocol": url.protocol};
+                    document = {"originalUrl": urlJSON.originalUrl, "hostname": urlJSON.hostname, "path": urlJSON.path, "protocol": urlJSON.protocol, "short_url": 1};
                   }
                   dbo.collection("url-mapping").insertOne(document, function(err, resultInsert) {
                     if(err) {
@@ -97,7 +96,7 @@ app.post("/api/shorturl/new", function (req, res) {
                       // Old version before using a placeholder variable on an error return page
                       //return res.json({"error": "couldn't register the new url"});
                     }
-                    console.log("Url " + url.url + " registered on db");
+                    console.log("Url " + urlJSON.originalUrl + " registered on db");
                   });
                   return res.render(__dirname + "/views/result.html", { short_url: JSON.stringify((result.length != 0) ? (result[0].maxShortUrl + 1) : 1) });
                   // Old version before using a variable on the html return page
@@ -119,7 +118,7 @@ app.post("/api/shorturl/new", function (req, res) {
 
 app.get(/\/api\/shorturl\/[0-9]+/, function(req, res) {
   //console.log(req.originalUrl);
-  var domain;
+  var url;
   let urlNumber = url_library.getShortUrlNumber(req.originalUrl);
   if(urlNumber) {
     let query = { "short_url": parseInt(urlNumber) };
@@ -129,9 +128,8 @@ app.get(/\/api\/shorturl\/[0-9]+/, function(req, res) {
         // Old version before using a variable on the html return page
         //return res.json({"error": err.code});
       }
-      console.log("result = " + result.original_url);
-      domain = result.protocol + result.original_url;
-      return res.redirect(domain);
+      console.log("result = " + result.originalUrl);
+      return res.redirect(result.originalUrl);
     });
   }
 });

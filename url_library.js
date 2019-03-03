@@ -1,5 +1,38 @@
 "use strict";
 
+const url = require('url');
+
+function verifyUrl(urlInput) {
+  let urlJSON = { 
+    originalUrl: "", 
+    hostname: "",
+    path: "",
+    protocol: "",
+    isValid: true
+  }
+  let urlInputAux = urlInput;
+  
+  try {
+    let protocol = checkProtocol(urlInput);
+    if(protocol === "none") {
+      urlInputAux = "https://" + urlInputAux;
+    }
+    const newUrl = url.parse(urlInputAux);
+    urlJSON.originalUrl = urlInputAux;
+    urlJSON.hostname = newUrl.hostname;
+    urlJSON.path = newUrl.path;
+    urlJSON.protocol = newUrl.protocol;
+    return urlJSON;
+    //console.log("HERE HERE HERE HERE HERE HERE " + newUrl.path);
+  } catch(e) {
+    if(e instanceof TypeError) {
+      urlJSON.isValid = false;
+      //console.log("INVALID URL HERE BITCH");
+      return urlJSON;
+    }
+  }
+}
+
 function checkProtocol(url) {
   let urlAux = url;
   let regexHTTP = /^http:\/\//;
@@ -49,6 +82,7 @@ function getShortUrlNumber(url) {
 }
 
 module.exports = {
+  verifyUrl: verifyUrl,
   validateUrl: validateUrl,
   parseUrl: parseUrl,
   getShortUrlNumber: getShortUrlNumber
